@@ -1,4 +1,9 @@
-use anchor_lang::prelude::*;
+pub mod errors;
+pub mod instructions;
+pub mod utils;
+pub mod state;
+use {anchor_lang::prelude::*, instructions::*};
+
 
 declare_id!("B8i8uoj4JGaJqiYaaEHQFdrHUVFEpgvtkFpAvbZxLbML");
 
@@ -6,10 +11,9 @@ declare_id!("B8i8uoj4JGaJqiYaaEHQFdrHUVFEpgvtkFpAvbZxLbML");
 pub mod oylpus_dao_smart_contract {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        Ok(())
+    pub fn initialize_dapp(ctx: Context<InitializeDapp>) -> Result<()> {
+        msg!("Initializing...");
+
+        initialize_dapp::handler(ctx)
     }
 }
-
-#[derive(Accounts)]
-pub struct Initialize {}
