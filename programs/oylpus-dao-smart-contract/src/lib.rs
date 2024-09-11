@@ -1,9 +1,8 @@
 pub mod errors;
 pub mod instructions;
-pub mod utils;
 pub mod state;
+pub mod utils;
 use {anchor_lang::prelude::*, instructions::*};
-
 
 declare_id!("B8i8uoj4JGaJqiYaaEHQFdrHUVFEpgvtkFpAvbZxLbML");
 
@@ -17,9 +16,9 @@ pub mod oylpus_dao_smart_contract {
         initialize_dapp::handler(ctx)
     }
 
-    pub fn bond_lamports(ctx: Context<BondLamportsContext>) -> Result<()> {
-        msg!("Bonding lamports...");
+    pub fn bond_lamports(ctx: Context<BondLamportsContext>, lamports_to_bond: u64) -> Result<()> {
+        msg!("Bonding {} lamports ...", lamports_to_bond);
 
-        bond_lamports::handler_bond(ctx)
+        bond_lamports::handler_bond(ctx, lamports_to_bond)
     }
 }

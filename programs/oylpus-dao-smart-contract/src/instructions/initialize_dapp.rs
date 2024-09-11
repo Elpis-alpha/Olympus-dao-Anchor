@@ -1,4 +1,7 @@
-use {crate::state::*, anchor_lang::prelude::*, anchor_spl::token_interface, std::mem::size_of};
+use {
+    crate::state::*, anchor_lang::prelude::*, anchor_spl::token_interface,
+    solana_program::system_program, std::mem::size_of,
+};
 
 pub fn handler(ctx: Context<InitializeDapp>) -> Result<()> {
     msg!("Treasury state initializing");
@@ -7,9 +10,25 @@ pub fn handler(ctx: Context<InitializeDapp>) -> Result<()> {
     treasury_state.bump = ctx.bumps.treasury_state;
     treasury_state.amount = 0;
     treasury_state.token_mint = ctx.accounts.token_mint.key();
-    treasury_state.treasury_bump = ctx.bumps.treasury_vault;
+
+    msg!("mid log1");
+    msg!(
+        "tresury authority key: {:?}",
+        ctx.accounts.treasury_authority.key()
+    );
+    treasury_state.treasury_authority = ctx.accounts.treasury_authority.key();
+    msg!("mid log1.5");
     treasury_state.treasury_authority_bump = ctx.bumps.treasury_authority;
+
+    msg!("mid log3");
     treasury_state.treasury_vault = ctx.accounts.treasury_vault.key();
+    msg!("mid log3.5");
+    treasury_state.treasury_vault_bump = ctx.bumps.treasury_vault;
+
+    msg!("mid log2");
+    treasury_state.treasury_vault_lamports = ctx.accounts.treasury_vault_lamports.key();
+    msg!("mid log2.5");
+    // treasury_state.treasury_vault_lamports_bump = ctx.bumps.treasury_vault_lamports;
 
     msg!("Treasury state initialized");
     Ok(())
@@ -44,7 +63,7 @@ pub struct InitializeDapp<'info> {
         bump,
         payer = payer,
         space = 8 + size_of::<TreasuryState>(),
-        )]
+    )]
     pub treasury_state: Account<'info, TreasuryState>,
 
     // treasury vault
@@ -60,15 +79,16 @@ pub struct InitializeDapp<'info> {
     pub treasury_vault: InterfaceAccount<'info, token_interface::TokenAccount>,
 
     // treasury vaults for lamports
+    /// CHECK: This is a treasury vault for lamports
     #[account(
         init,
         payer = payer,
         space = 8 + 8,
-        seeds = [treasury_authority.key().as_ref(), TREASURY_LAMPORTS_SEED.as_bytes()],
-        bump,
+        // seeds = [treasury_authority.key().as_ref(), TREASURY_LAMPORTS_SEED.as_bytes()],
+        // bump,
         // owner = system_program::ID // The account is owned by the system program.
     )]
-    pub treasury_vault_lamports: AccountInfo<'info>,
+    pub treasury_vault_lamports: UncheckedAccount<'info>,
 
     #[account(mut)]
     pub payer: Signer<'info>,

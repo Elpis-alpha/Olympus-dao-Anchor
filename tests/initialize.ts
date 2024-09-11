@@ -19,75 +19,88 @@ describe("oylpus-dao-smart-contract", async () => {
     program.programId
   );
 
+  let [treasuryVault] = PublicKey.findProgramAddressSync(
+    [treasuryAuthority.toBuffer(), Buffer.from("treasury_seed")],
+    program.programId
+  );
+
+  // let [treasuryVaultLamports] = PublicKey.findProgramAddressSync(
+  //   [treasuryAuthority.toBuffer(), Buffer.from("treasury_lamports_seed")],
+  //   program.programId
+  // );
+  const [treasuryVaultLamports, treasuryVaultLamportsBump] =
+    PublicKey.findProgramAddressSync(
+      [treasuryAuthority.toBuffer(), Buffer.from("treasury_lamports_seed")],
+      program.programId
+    );
+
   it("Is initialized!", async () => {
-    // give funds
-    await safeAirdrop(payer.publicKey, provider.connection);
-    await safeAirdrop(treasuryAuthority, provider.connection);
-    delay(2000);
+    try {
+      // give funds
+      await safeAirdrop(payer.publicKey, provider.connection);
+      await safeAirdrop(treasuryAuthority, provider.connection);
+      delay(2000);
 
-    let tokenMint = await createMint(
-      provider.connection,
-      payer,
-      treasuryAuthority,
-      undefined,
-      6,
-      undefined,
-      undefined,
-      TOKEN_PROGRAM_ID
-    );
-    console.log("tokenMint", tokenMint.toBase58());
-
-    let [treasuryState] = PublicKey.findProgramAddressSync(
-      [tokenMint.toBuffer(), Buffer.from("treasury_state_seed")],
-      program.programId
-    );
-
-    let [treasuryVault] = PublicKey.findProgramAddressSync(
-      [
-        tokenMint.toBuffer(),
-        treasuryAuthority.toBuffer(),
-        Buffer.from("treasury_seed"),
-      ],
-      program.programId
-    );
-
-    console.table([
-      { name: "payer", value: payer.publicKey.toBase58().substring(0, 15) },
-      {
-        name: "treasuryAuthority",
-        value: treasuryAuthority.toBase58().substring(0, 15),
-      },
-      { name: "tokenMint", value: tokenMint.toBase58().substring(0, 15) },
-      {
-        name: "treasuryState",
-        value: treasuryState.toBase58().substring(0, 15),
-      },
-      {
-        name: "treasuryVault",
-        value: treasuryVault.toBase58().substring(0, 15),
-      },
-    ]);
-
-    const tx = await program.methods
-      .initializeDapp()
-      .accounts({
+      let tokenMint = await createMint(
+        provider.connection,
+        payer,
         treasuryAuthority,
-        tokenMint,
-        treasuryState,
-        treasuryVault,
-        tokenProgram: TOKEN_PROGRAM_ID,
-        systemProgram: SystemProgram.programId,
-        payer: payer.publicKey,
-        rent: SYSVAR_RENT_PUBKEY,
-      })
-      .signers([payer])
-      .rpc();
+        undefined,
+        6,
+        undefined,
+        undefined,
+        TOKEN_PROGRAM_ID
+      );
+      console.log("tokenMint", tokenMint.toBase58());
 
-    console.log("\nYour transaction signature");
-    explorerLinkLog(tx, "tx", "testnet");
+      let [treasuryState] = PublicKey.findProgramAddressSync(
+        [tokenMint.toBuffer(), Buffer.from("treasury_state_seed")],
+        program.programId
+      );
 
-    const tresV = await program.account.treasuryState.fetch(treasuryState)
-    console.log(tresV)
+      console.table([
+        { name: "payer", value: payer.publicKey.toBase58().substring(0, 15) },
+        {
+          name: "treasuryAuthority",
+          value: treasuryAuthority.toBase58().substring(0, 15),
+        },
+        { name: "tokenMint", value: tokenMint.toBase58().substring(0, 15) },
+        {
+          name: "treasuryState",
+          value: treasuryState.toBase58().substring(0, 15),
+        },
+        {
+          name: "treasuryVault",
+          value: treasuryVault.toBase58().substring(0, 15),
+        },
+      ]);
+
+      const tx = await program.methods
+        .initializeDapp()
+        .accounts({
+          treasuryAuthority,
+          tokenMint,
+          treasuryState,
+          treasuryVault,
+          // treasuryVaultLamports,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+          payer: payer.publicKey,
+          rent: SYSVAR_RENT_PUBKEY,
+        })
+        .signers([payer])
+        .rpc();
+
+      console.log("\nYour transaction signature");
+      explorerLinkLog(tx, "tx", "testnet");
+
+      const tresV = await program.account.treasuryState.fetch(treasuryState);
+      console.log(tresV);
+    } catch (error) {
+      // console.error(error);
+      if (error.getLogs) console.table(await error.getLogs());
+      throw new Error(error);
+    }
   });
 });
 

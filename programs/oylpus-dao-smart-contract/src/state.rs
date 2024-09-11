@@ -14,11 +14,14 @@ pub struct TreasuryState {
     pub token_mint: Pubkey,
     // pub staking_token_mint: Pubkey,
     // pub staking_token_mint_bump: u8,
-    pub treasury_bump: u8,
     pub treasury_authority: Pubkey,
     pub treasury_authority_bump: u8,
+
     pub treasury_vault: Pubkey,
+    pub treasury_vault_bump: u8,
+
     pub treasury_vault_lamports: Pubkey,
+    pub treasury_vault_lamports_bump: u8,
 }
 
 #[account]
