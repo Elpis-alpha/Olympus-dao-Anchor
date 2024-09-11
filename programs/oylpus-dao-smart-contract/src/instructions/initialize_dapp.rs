@@ -1,9 +1,17 @@
-use anchor_lang::prelude::*;
-use crate::state::TREASURY_AUTH_SEED;
+use {crate::state::*, anchor_lang::prelude::*, anchor_spl::token_interface, std::mem::size_of};
 
 pub fn handler(ctx: Context<InitializeDapp>) -> Result<()> {
-    let treasury_authority = &mut ctx.accounts.treasury_authority;
-    msg!("Pool state initialized");
+    msg!("Treasury state initializing");
+
+    let treasury_state = &mut ctx.accounts.treasury_state;
+    treasury_state.bump = ctx.bumps.treasury_state;
+    treasury_state.amount = 0;
+    treasury_state.token_mint = ctx.accounts.token_mint.key();
+    treasury_state.treasury_bump = ctx.bumps.treasury_vault;
+    treasury_state.treasury_authority_bump = ctx.bumps.treasury_authority;
+    treasury_state.treasury_vault = ctx.accounts.treasury_vault.key();
+
+    msg!("Treasury state initialized");
     Ok(())
 }
 
@@ -16,4 +24,55 @@ pub struct InitializeDapp<'info> {
         bump
     )]
     pub treasury_authority: UncheckedAccount<'info>,
+
+    // token mint account (only two)
+    #[account(
+        // init,
+        // seeds = [TREASURY_MINT_SEED.as_bytes()],
+        // bump,
+        // payer = payer,
+        mint::authority = treasury_authority,
+        mint::decimals = TREASURY_MINT_DECIMALS,
+        mint::token_program = token_program,
+    )]
+    pub token_mint: InterfaceAccount<'info, token_interface::Mint>,
+
+    // treasury state account
+    #[account(
+        init,
+        seeds = [token_mint.key().as_ref(), TREASURY_STATE_SEED.as_bytes()],
+        bump,
+        payer = payer,
+        space = 8 + size_of::<TreasuryState>(),
+        )]
+    pub treasury_state: Account<'info, TreasuryState>,
+
+    // treasury vault
+    #[account(
+        init,
+        payer = payer,
+        seeds = [treasury_authority.key().as_ref(), TREASURY_SEED.as_bytes()],
+        bump,
+        token::mint = token_mint,
+        token::authority = treasury_authority,
+        token::token_program = token_program,
+    )]
+    pub treasury_vault: InterfaceAccount<'info, token_interface::TokenAccount>,
+
+    // treasury vaults for lamports
+    #[account(
+        init,
+        payer = payer,
+        space = 8 + 8,
+        seeds = [treasury_authority.key().as_ref(), TREASURY_LAMPORTS_SEED.as_bytes()],
+        bump,
+        // owner = system_program::ID // The account is owned by the system program.
+    )]
+    pub treasury_vault_lamports: AccountInfo<'info>,
+
+    #[account(mut)]
+    pub payer: Signer<'info>,
+    pub token_program: Interface<'info, token_interface::TokenInterface>,
+    pub system_program: Program<'info, System>,
+    pub rent: Sysvar<'info, Rent>,
 }

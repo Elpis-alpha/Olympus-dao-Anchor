@@ -16,4 +16,10 @@ pub mod oylpus_dao_smart_contract {
 
         initialize_dapp::handler(ctx)
     }
+
+    pub fn bond_lamports(ctx: Context<BondLamportsContext>) -> Result<()> {
+        msg!("Bonding lamports...");
+
+        bond_lamports::handler_bond(ctx)
+    }
 }
