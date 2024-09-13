@@ -33,3 +33,8 @@ pub struct BondedUserState {
     pub bonded_lamports: u64,
     pub bond_date: i64,
 }
+
+#[account]
+pub struct TreasuryVaultLamports {
+    pub amount: u64, // Store the lamports here
+}

@@ -1,12 +1,15 @@
-use {
-    crate::state::*, anchor_lang::prelude::*, anchor_spl::token_interface,
-    solana_program::system_program, std::mem::size_of,
-};
+use {crate::state::*, anchor_lang::prelude::*, anchor_spl::token_interface, std::mem::size_of};
 
 pub fn handler(ctx: Context<InitializeDapp>) -> Result<()> {
-    msg!("Treasury state initializing");
+    msg!("Treasury lamports vault initializing");
+    let treasury_lamports_vault = &mut ctx.accounts.treasury_vault_lamports;
+    treasury_lamports_vault.amount = 0;
 
+    msg!("Treasury lamports vault initialized");
+
+    msg!("Treasury state initializing");
     let treasury_state = &mut ctx.accounts.treasury_state;
+
     treasury_state.bump = ctx.bumps.treasury_state;
     treasury_state.amount = 0;
     treasury_state.token_mint = ctx.accounts.token_mint.key();
@@ -69,15 +72,14 @@ pub struct InitializeDapp<'info> {
     pub treasury_vault: InterfaceAccount<'info, token_interface::TokenAccount>,
 
     // treasury vaults for lamports
-    /// CHECK: This is a treasury vault for lamports
     #[account(
-        // init,
-        // payer = payer,
-        // space = 8 + 8,
+        init,
+        payer = payer,
+        space = 8 + size_of::<TreasuryVaultLamports>(),
         seeds = [treasury_authority.key().as_ref(), TREASURY_LAMPORTS_SEED.as_bytes()],
         bump,
     )]
-    pub treasury_vault_lamports: AccountInfo<'info>,
+    pub treasury_vault_lamports: Account<'info, TreasuryVaultLamports>,
 
     #[account(mut)]
     pub payer: Signer<'info>,
