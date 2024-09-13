@@ -10,7 +10,6 @@ pub const TREASURY_MINT_DECIMALS: u8 = 6;
 #[account]
 pub struct TreasuryState {
     pub bump: u8,
-    pub amount: u64,
     pub token_mint: Pubkey,
     // pub staking_token_mint: Pubkey,
     // pub staking_token_mint_bump: u8,
@@ -19,9 +18,11 @@ pub struct TreasuryState {
 
     pub treasury_vault: Pubkey,
     pub treasury_vault_bump: u8,
+    pub treasury_vault_balance: u64,
 
     pub treasury_vault_lamports: Pubkey,
     pub treasury_vault_lamports_bump: u8,
+    // pub treasury_vault_lamports_balance: u64,
 }
 
 #[account]
@@ -36,5 +37,6 @@ pub struct BondedUserState {
 
 #[account]
 pub struct TreasuryVaultLamports {
-    pub amount: u64, // Store the lamports here
+    pub balance: u64, // Store the lamports here
+    pub bump: u8,
 }

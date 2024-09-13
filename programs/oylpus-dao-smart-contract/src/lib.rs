@@ -10,10 +10,16 @@ declare_id!("B8i8uoj4JGaJqiYaaEHQFdrHUVFEpgvtkFpAvbZxLbML");
 pub mod oylpus_dao_smart_contract {
     use super::*;
 
+    pub fn initialize_lamp(ctx: Context<InitializeLamp>) -> Result<()> {
+        msg!("Initializing...");
+
+        initialize_dapp::handler_lamp(ctx)
+    }
+
     pub fn initialize_dapp(ctx: Context<InitializeDapp>) -> Result<()> {
         msg!("Initializing...");
 
-        initialize_dapp::handler(ctx)
+        initialize_dapp::handler_tres(ctx)
     }
 
     pub fn bond_lamports(ctx: Context<BondLamportsContext>, lamports_to_bond: u64) -> Result<()> {
